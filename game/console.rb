@@ -14,19 +14,12 @@ module Game
       @players << Player.new(symbol)
     end
 
-    def play(symbol, position)
-      player = players.find { |p| p.symbol == symbol }
-      board.play(player, position)
-
-      board.display
-      if winner
-        puts "WINNER: #{winner.symbol}"
-        exit
+    def play(player, position)
+      board.with_player(player) do |board|
+        move = board.play(position)
+        exit if board.winner?
+        return move
       end
-    end
-
-    def winner
-      board.winner(players)
     end
 
     private

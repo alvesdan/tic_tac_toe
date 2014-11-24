@@ -14,40 +14,56 @@ module Game
     attr_reader :board
     def initialize(board = nil)
       @board = board || empty_board
+      @current_player = nil
     end
 
-    def play(player, position)
-      return :not_avaiable unless Array(0..9).include?(position)
-      return :not_avaiable unless board[position].is_a?(Avaiable)
+    def with_player(player, &block)
+      @current_player = player
+      block.call(self)
+      @current_player = nil
+    end
 
-      @board[position] = player.symbol
+    def play(position)
+      return :not_available unless @current_player
+      return :not_available unless Array(0..9).include?(position)
+      return :not_available unless board[position].is_a?(Available)
+
+      @board[position] = @current_player.symbol
       return :played
     end
 
-    def winner(players)
-      players.each do |player|
-        if WIN_COMBINATIONS.include?(player_board(player))
-          return player
-        end
+    def winner?
+      WIN_COMBINATIONS.each do |combination|
+        return true if combination - player_board == []
       end
-      nil
+      false
     end
 
     def display
+      print_line
       board.each_slice(3) do |slice|
-        puts slice.map(&:to_s).join(', ')
+        STDOUT.puts slice.map(&:to_s).join(", ")
       end
+      print_line
+    end
+
+    def print_line
+      STDOUT.puts "-" * 7
+    end
+
+    def available_play?
+      board.any? { |slot| slot.is_a?(Available) }
     end
 
     private
 
     def empty_board
-      (1..9).map { Avaiable.new }
+      (0..8).map { |number| Available.new(number) }
     end
 
-    def player_board(player)
+    def player_board
       board.each_with_index.map { |value, index|
-        if value.is_a?(Avaiable) || value != player.symbol
+        if value.is_a?(Available) || value != @current_player.symbol
           nil
         else
           index
