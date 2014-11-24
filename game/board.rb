@@ -25,7 +25,7 @@ module Game
 
     def play(position)
       return :not_available unless @current_player
-      return :not_available unless Array(0..9).include?(position)
+      return :not_available unless Array(0..8).include?(position)
       return :not_available unless board[position].is_a?(Available)
 
       @board[position] = @current_player.symbol
